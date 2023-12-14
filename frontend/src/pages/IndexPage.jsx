@@ -13,8 +13,8 @@ const IndexPage = () => {
   return (
     <div>
       <Post title={PostProps.title} author={PostProps.author} time={PostProps.time} imgUrl={PostProps.imgUrl} data={PostProps.data}/>
-      <Post/>
-      <Post/>
+      <Post title={PostProps.title} author={PostProps.author} time={PostProps.time} imgUrl={PostProps.imgUrl} data={PostProps.data}/>
+      <Post title={PostProps.title} author={PostProps.author} time={PostProps.time} imgUrl={PostProps.imgUrl} data={PostProps.data}/>
     </div>
   )
 }

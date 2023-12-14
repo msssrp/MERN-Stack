@@ -1,14 +1,25 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { useContext , useEffect } from 'react'
+import { useContext } from 'react'
 import { UserContext } from '../context/UserContext'
+const API_URL = import.meta.env.VITE_API_URL
 const Header = () => {
+
+  const {userInfo , setUserInfo} = useContext(UserContext)
+  const username = userInfo?.username
+  const handleLogout = () =>{
+    fetch(`${API_URL}/logout`,{
+      credentials:"include",
+      method:"POST"
+    })
+    setUserInfo({})
+  }
+  console.log(username)
   return (
     <header>
       <Link to={'/'} className='logo'>SE NPRU blog</Link>
       <nav>
-        <Link to={'/login'}>Login</Link>
-        <Link to={'/register'}>Register</Link>
+        {username ? <button onClick={handleLogout}>Logout</button> : <><Link to={'/login'}>Login</Link><Link to={'/register'}>Register</Link></>}
       </nav>
     </header>
   )
