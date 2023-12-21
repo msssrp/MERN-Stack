@@ -73,6 +73,7 @@ app.post('/logout',(req,res)=>{
     res.cookie("token","").json("ok")
 })
 
+
 //create post
 const PostModel = require('./models/post')
 app.post('/post',uploadMiddleware.single('file') , async(req,res)=>{
@@ -95,6 +96,14 @@ app.post('/post',uploadMiddleware.single('file') , async(req,res)=>{
         res.json(postDoc)
     })
 })
+app.get('/posts',async(req,res)=>{
+    const posts = await PostModel.find()
+    if(posts.length === 0){
+        res.status(404).json("cant find post")
+    }
+    res.status(202).json(posts)
+})
+
 
 app.get("/",(req,res)=>{
     res.send("API FOR NPRU BLOG")

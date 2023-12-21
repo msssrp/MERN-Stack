@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Post from '../components/Post'
-
+const API_URL = import.meta.env.VITE_API_URL
 const PostProps = {
   title: "ศาลสหรัฐฯ จำคุก Cloud Engineer ฐานลบ GitHub ของธนาคารนายจ้างหลังถูกไล่ออก",
   author: "lew",
@@ -10,11 +10,31 @@ const PostProps = {
 }
 
 const IndexPage = () => {
+  const [postData , setPostData] = useState([])
+  useEffect(()=>{
+    const getPosts = async() =>{
+      const resp = await fetch(`${API_URL}/posts`,{
+        method:"GET",
+        headers:{
+          "Content-Type":"application/json"
+        }
+      })
+      const respJson = await resp.json()
+      if(resp.ok){
+        setPostData(respJson)
+      }
+    }
+    getPosts()
+  },[])
+
+  console.log(postData)
   return (
     <div>
-      <Post title={PostProps.title} author={PostProps.author} time={PostProps.time} imgUrl={PostProps.imgUrl} data={PostProps.data}/>
-      <Post title={PostProps.title} author={PostProps.author} time={PostProps.time} imgUrl={PostProps.imgUrl} data={PostProps.data}/>
-      <Post title={PostProps.title} author={PostProps.author} time={PostProps.time} imgUrl={PostProps.imgUrl} data={PostProps.data}/>
+      {postData.map((data)=>{
+        return(
+          <Post title={data.title} author={data.author} time={data.createdAt} imgUrl={data.cover} data={data.content}/>
+        )
+      })}
     </div>
   )
 }
