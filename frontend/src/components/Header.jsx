@@ -14,7 +14,6 @@ const Header = () => {
     })
     setUserInfo({})
   }
-  console.log(username)
   return (
     <header>
       <Link to={'/'} className='logo'>SE NPRU blog</Link>

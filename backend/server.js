@@ -76,6 +76,7 @@ app.post('/logout',(req,res)=>{
 
 //create post
 const PostModel = require('./models/post')
+const path = require('path')
 app.post('/post',uploadMiddleware.single('file') , async(req,res)=>{
     const {originalname , path} = req.file
     const parts = originalname.split('.')
@@ -96,6 +97,64 @@ app.post('/post',uploadMiddleware.single('file') , async(req,res)=>{
         res.json(postDoc)
     })
 })
+
+//put
+app.put('/post/:id', uploadMiddleware.single('file'), async (req, res) => {
+    const postId = req.params.id;
+  
+    const fileDetails = req.file;
+  
+    if (fileDetails && fileDetails.originalname && fileDetails.path) {
+      const { originalname, path } = fileDetails;
+      const parts = originalname.split('.');
+      const ext = parts[parts.length - 1];
+      const newPath = path + '.' + ext;
+      fs.renameSync(path, newPath);
+      fileDetails.newPath = newPath;
+    }
+  
+    const { token } = req.cookies;
+  
+    jwt.verify(token, secret, async (err, info) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: 'Failed to verify token.' });
+      }
+      
+  
+      const { userId, title, summary, content } = req.body;
+      const postData = await PostModel.findById(postId)
+
+      if(postData.author.toString() != userId){
+        return res.status(401).json('User dont match with author')
+      }
+      const updateFields = {};
+      
+      if (title) updateFields.title = title;
+      if (summary) updateFields.summary = summary;
+      if (content) updateFields.content = content;
+      if (fileDetails && fileDetails.newPath) updateFields.cover = fileDetails.newPath;
+  
+      try {
+        const updatedPost = await PostModel.findByIdAndUpdate(
+          postId,
+          updateFields,
+          { new: true }
+        );
+  
+        if (!updatedPost) {
+          return res.status(404).json({ error: 'Post not found.' });
+        }
+  
+        res.json(updatedPost);
+      } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Failed to update post.' });
+      }
+    });
+});
+  
+//get
 app.get('/posts',async(req,res)=>{
     const posts = await PostModel.find()
     if(posts.length === 0){
@@ -104,6 +163,44 @@ app.get('/posts',async(req,res)=>{
     res.status(202).json(posts)
 })
 
+
+app.get('/post/:id',async(req,res)=>{
+    const id = req.params.id
+    if(!id){
+        res.status(404).json("no id provided")
+    }
+    try {
+    const post = await PostModel.findById(id)
+    if(!post){
+        res.status(404).json(`no document found on this ${id}`)
+    }
+    res.status(202).json(post)   
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+    
+})
+
+//delelte
+app.delete('/post/:id', async(req,res)=>{
+    const id = req.params.id
+    if(!id){
+        res.status(404).json('please provide id')
+    }
+    try {
+        const result = await PostModel.deleteOne({_id:id})
+        if(result.deletedCount === 0){
+            console.log(result.deletedCount)
+            res.status(404).json(`Cannot delete post ${id} maybe wronge id`)
+        }
+        res.status(202).json(`${id} deleted`)
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+app.use('/uploads' , express.static(path.join(__dirname,'uploads')))
 
 app.get("/",(req,res)=>{
     res.send("API FOR NPRU BLOG")

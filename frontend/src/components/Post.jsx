@@ -1,24 +1,23 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-
-const Post = ({title , author , time , imgUrl , data}) => {
+import {format} from 'date-fns'
+const API_URL = import.meta.env.VITE_API_URL
+const Post = ({id,title , author , time , imgUrl , data}) => {
   return (
     <div className='post'>
         <div className="image">
-            <Link to={'/post/1'}>
-                <img src={`${imgUrl}`} alt="" />
+            <Link to={`/post/${id}`}>
+                <img src={`${API_URL}/${imgUrl}`} alt="" />
             </Link>
         </div>
         <div className="texts"> 
-            <Link>
+            <Link to={`/post/${id}`}>
                 <h2>{title}</h2>
             </Link>
             <a>By: <b>{author}</b></a>
-            <time>{" "} {time}</time>   
-            <p className="info">
-                <p className="summary">
-                    {data}
-                </p>
+            <time>{" "} {format(new Date(time),'dd MM yyyy HH:MM')}</time>   
+            <p className="info ">
+                {data}
             </p>
         </div>
     </div>
